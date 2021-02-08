@@ -48,4 +48,9 @@ class Admin::UsersController < ApplicationController
     params.require(:user).permit(:name, :email, :admin, :password, :password_confirmation)
   end
   
+  def require_admin
+    redirect_to root_url unless current_user.admin?
+  end
+  #管理機能の存在を隠すにはHTTPステータスコード404を返すコードを書く
+  
 end
