@@ -1,6 +1,6 @@
 class TasksController < ApplicationController
-  #重複を避けるための記述(共通化したい処理を記述)
-  before_action :set_task, onlu: [:show, :edit, :update, :destroy]
+  # #重複を避けるための記述(共通化したい処理を記述)
+  before_action :set_task, only: [:show, :edit, :update, :destroy]
   
   def index
     @tasks = current_user.tasks.order(created_at: :desc) #作成日時の新しい順に表示
@@ -11,11 +11,22 @@ class TasksController < ApplicationController
   end
 
   def new
-    @task = Task.new(task_params.merge(user_id: current_user.id))
+    @task = Task.new
+  end
+  
+  def confirm_new
+    @task = current_user.tasks.new(task_params)
+    render :new unless @task.valid?
   end
 
   def create
-    @task = Task.new(task_params)
+    @task = Task.new(task_params.merge(user_id: current_user.id))
+    
+    if params[:back].present?
+      render :new
+      return
+    end
+      
     if @task.save
       redirect_to @task, notice: "タスク「#{@task.name}」を登録しました。"
     else
